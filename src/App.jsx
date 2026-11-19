@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 
 import TokenCallListener from "./components/TokenCallListener";
+import MisalLoader from "./components/MisalLoader";
 
 // Lazy load all page components
 const HomeScreen = lazy(() => import("./pages/HomeScreen"));
@@ -29,19 +30,10 @@ function CustomerLayout() {
   );
 }
 
-// Optional: Replace this with a custom spinner or skeleton screen
-function PageLoader() {
-  return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-      Loading...
-    </div>
-  );
-}
-
 export default function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<PageLoader />}>
+      <Suspense fallback={<MisalLoader />}>
         <Routes>
           {/* CUSTOMER ROUTES */}
           <Route element={<CustomerLayout />}>

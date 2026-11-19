@@ -18,7 +18,7 @@ import {
     Sparkles
 } from 'lucide-react'
 import AdvertisementCarousel from '../components/AdvertisementCarousel'
-import MisalLoader from '../components/MisalLoader'
+// import MisalLoader from '../components/MisalLoader'
 import { useTokenStore } from '../store/token.store'
 
 export default function HomeScreen() {
@@ -171,9 +171,9 @@ export default function HomeScreen() {
         if (deltaX > 0) showPrevPhoto()
         else showNextPhoto()
     }
-    if (loading) {
-        return <MisalLoader />
-    }
+    // if (loading) {
+    //     return <MisalLoader />
+    // }
     if (error) {
         return (
             <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
