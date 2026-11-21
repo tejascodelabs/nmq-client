@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ClipboardList,
   Clock,
@@ -8,51 +8,47 @@ import {
   Star,
   BadgeCheck,
   Home,
-  Megaphone,
-} from 'lucide-react'
-import AdvertisementCarousel from '../components/AdvertisementCarousel'
+} from "lucide-react";
+import AdvertisementCarousel from "../components/AdvertisementCarousel";
 import { useTokenStore } from "../store/token.store";
 
-
-const API_BASE_URL = import.meta.env.VITE_API_URL
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // Dummy feedback options
 const FEEDBACK_OPTIONS = [
-  'Easy Booking',
-  'Smooth Queue',
-  'Friendly Staff',
-  'Fast Service',
-  'Clean Restaurant',
-]
+  "Easy Booking",
+  "Smooth Queue",
+  "Friendly Staff",
+  "Fast Service",
+  "Clean Restaurant",
+];
 
 // Rating level descriptors
 const RATING_LABELS = [
-  '',
-  '⭐ Poor Experience',
-  '⭐⭐ Fair Experience',
-  '⭐⭐⭐ Good Experience',
-  '⭐⭐⭐⭐ Very Good',
-  '⭐⭐⭐⭐⭐ Excellent!',
-]
+  "",
+  "⭐ Poor Experience",
+  "⭐⭐ Fair Experience",
+  "⭐⭐⭐ Good Experience",
+  "⭐⭐⭐⭐ Very Good",
+  "⭐⭐⭐⭐⭐ Excellent!",
+];
 
 export default function CustomerArrived() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const activeToken = location.state?.token || null
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activeToken = location.state?.token || null;
 
-  console.log(activeToken, "activeToken")
-
-  const [rating, setRating] = useState(0)
-  const [likedOptions, setLikedOptions] = useState([])
-  const [feedback, setFeedback] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [rating, setRating] = useState(0);
+  const [likedOptions, setLikedOptions] = useState([]);
+  const [feedback, setFeedback] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    if (!activeToken) navigate('/', { replace: true })
-  }, [activeToken, navigate])
+    if (!activeToken) navigate("/", { replace: true });
+  }, [activeToken, navigate]);
 
-  if (!activeToken) return null
+  if (!activeToken) return null;
 
   const waitingTimeSeconds = Number(activeToken?.waitingTimeSeconds) || 0;
 
@@ -75,29 +71,25 @@ export default function CustomerArrived() {
   // Token number display string
   const tokenDisplay = activeToken
     ? `${activeToken.queueType || activeToken.queue_type}-${activeToken.tokenNo || activeToken.token_no}`
-    : '--'
+    : "--";
 
   const handleBrowseShops = () => {
-    navigate('/')
-  }
+    navigate("/");
+  };
 
   const toggleOption = (option) => {
     setLikedOptions((prev) =>
       prev.includes(option)
         ? prev.filter((item) => item !== option)
-        : [...prev, option]
-    )
-  }
+        : [...prev, option],
+    );
+  };
 
   // Handle feedback form submission with backend API integration
   const handleSubmitFeedback = async () => {
     if (submitted || submitting) return;
 
-    if (
-      rating === 0 &&
-      likedOptions.length === 0 &&
-      feedback.trim() === ""
-    ) {
+    if (rating === 0 && likedOptions.length === 0 && feedback.trim() === "") {
       alert("Please share at least one feedback before submitting.");
       return;
     }
@@ -113,8 +105,7 @@ export default function CustomerArrived() {
       const payload = {
         shopId: activeToken.shopId || activeToken.shop_id,
         tokenId: activeToken.id || activeToken._id,
-        customerName:
-          activeToken.name || activeToken.customer_name || "Guest",
+        customerName: activeToken.name || activeToken.customer_name || "Guest",
         mobile: activeToken.mobile || activeToken.phone || "",
         rating: rating > 0 ? rating : null,
         likedOptions,
@@ -155,10 +146,10 @@ export default function CustomerArrived() {
   };
 
   const getCharCountColor = () => {
-    if (feedback.length > 260) return 'text-red-600'
-    if (feedback.length > 200) return 'text-amber-600'
-    return 'text-emerald-600'
-  }
+    if (feedback.length > 260) return "text-red-600";
+    if (feedback.length > 200) return "text-amber-600";
+    return "text-emerald-600";
+  };
 
   return (
     <div className="relative min-h-screen w-full bg-[#F8F4EA] px-4 py-8 sm:px-6 sm:py-10 flex justify-center items-center overflow-x-hidden font-sans">
@@ -173,9 +164,9 @@ export default function CustomerArrived() {
             </div>
 
             <h1 className="arr-d1 text-gray-900 font-extrabold text-3xl sm:text-4xl mb-3">
-              Welcome Back,{' '}
+              Welcome Back,{" "}
               <span className="text-orange-600">
-                {activeToken?.name || activeToken?.customer_name || 'Guest'}
+                {activeToken?.name || activeToken?.customer_name || "Guest"}
               </span>
             </h1>
 
@@ -211,7 +202,8 @@ export default function CustomerArrived() {
                 <div className="flex flex-col text-left">
                   <div className="text-xs text-[#8A7F71]">Guests</div>
                   <div className="text-sm font-bold text-[#2B2118] whitespace-nowrap">
-                    {activeToken?.groupSize || activeToken?.group_size || 1} People
+                    {activeToken?.groupSize || activeToken?.group_size || 1}{" "}
+                    People
                   </div>
                 </div>
               </div>
@@ -249,11 +241,8 @@ export default function CustomerArrived() {
             </div>
 
             <div className="mt-1">
-              <AdvertisementCarousel
-                placement="arrived"
-              />
+              <AdvertisementCarousel placement="arrived" />
             </div>
-
 
             <div className="arr-d3 bg-white rounded-2xl p-5 border border-[#F3E5D0] shadow-sm mt-5">
               <h3 className="m-0 text-gray-900 text-lg font-bold">
@@ -272,10 +261,11 @@ export default function CustomerArrived() {
                     className="p-0 border-none bg-transparent cursor-pointer transition-transform duration-200 hover:scale-110 active:scale-90"
                   >
                     <Star
-                      className={`w-9 h-9 ${rating >= star
-                        ? 'fill-amber-400 text-amber-300'
-                        : 'fill-transparent text-amber-300'
-                        }`}
+                      className={`w-9 h-9 ${
+                        rating >= star
+                          ? "fill-amber-400 text-amber-300"
+                          : "fill-transparent text-amber-300"
+                      }`}
                     />
                   </button>
                 ))}
@@ -296,20 +286,21 @@ export default function CustomerArrived() {
 
               <div className="flex flex-wrap gap-2.5 justify-center">
                 {FEEDBACK_OPTIONS.map((option) => {
-                  const selected = likedOptions.includes(option)
+                  const selected = likedOptions.includes(option);
                   return (
                     <button
                       type="button"
                       key={option}
                       onClick={() => toggleOption(option)}
-                      className={`px-3.5 py-2.5 rounded-full text-xs font-semibold border transition-all duration-200 ${selected
-                        ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white border-emerald-600 shadow-md shadow-emerald-600/20'
-                        : 'bg-gray-50 text-gray-600 border-gray-200 hover:-translate-y-0.5 shadow-none'
-                        }`}
+                      className={`px-3.5 py-2.5 rounded-full text-xs font-semibold border transition-all duration-200 ${
+                        selected
+                          ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white border-emerald-600 shadow-md shadow-emerald-600/20"
+                          : "bg-gray-50 text-gray-600 border-gray-200 hover:-translate-y-0.5 shadow-none"
+                      }`}
                     >
                       {option}
                     </button>
-                  )
+                  );
                 })}
               </div>
             </div>
@@ -326,7 +317,7 @@ export default function CustomerArrived() {
                 value={feedback}
                 onChange={(e) => {
                   if (e.target.value.length <= 300) {
-                    setFeedback(e.target.value)
+                    setFeedback(e.target.value);
                   }
                 }}
                 placeholder="Share your experience or suggestions..."
@@ -344,12 +335,13 @@ export default function CustomerArrived() {
               type="button"
               onClick={handleSubmitFeedback}
               disabled={submitting}
-              className={`w-full mt-5 h-14 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold text-base shadow-lg shadow-emerald-600/25 transition-all ${submitting
-                ? 'opacity-75 cursor-not-allowed'
-                : 'hover:-translate-y-0.5 active:scale-95 cursor-pointer'
-                }`}
+              className={`w-full mt-5 h-14 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold text-base shadow-lg shadow-emerald-600/25 transition-all ${
+                submitting
+                  ? "opacity-75 cursor-not-allowed"
+                  : "hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+              }`}
             >
-              {submitting ? 'Submitting...' : 'Submit Feedback'}
+              {submitting ? "Submitting..." : "Submit Feedback"}
             </button>
           </>
         ) : (
@@ -390,5 +382,5 @@ export default function CustomerArrived() {
         )}
       </div>
     </div>
-  )
+  );
 }

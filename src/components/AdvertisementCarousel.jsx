@@ -209,7 +209,9 @@ export default function AdvertisementCarousel({
   const currentTokenId = useTokenStore((state) => state.currentTokenId);
   const currentMobile = useTokenStore((state) => state.currentMobile);
   const currentShop = useTokenStore((state) => state.currentShop);
-  const currentCustomerName = useTokenStore((state) => state.currentCustomerName);
+  const currentCustomerName = useTokenStore(
+    (state) => state.currentCustomerName,
+  );
 
   const shopId = shopIdProp ?? currentShop?.shopId ?? currentShop?.id ?? null;
 

@@ -1,15 +1,14 @@
 import api from "./axios";
 
-
 export const createTokenApi = async (data) => {
-    const response = await api.post(`/tokens`, data);
+  const response = await api.post(`/tokens`, data);
 
-    return response.data;
+  return response.data;
 };
 
 export const getTokenByIdApi = async (tokenId) => {
   const response = await api.get(`/tokens/${tokenId}`);
-  console.log("getTokenByIdApi", response)
+  console.log("getTokenByIdApi", response);
 
   return response.data;
 };

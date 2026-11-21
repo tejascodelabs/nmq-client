@@ -1,9 +1,5 @@
 import { create } from "zustand";
-import {
-  loginApi,
-  refreshTokenApi,
-  logoutApi,
-} from "../api/auth.api";
+import { loginApi, refreshTokenApi, logoutApi } from "../api/auth.api";
 
 const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
@@ -30,29 +26,19 @@ const useAuthStore = create((set) => ({
 
       const response = await loginApi(data);
 
-      const {
-        user,
-        accessToken,
-        refreshToken,
-      } = response.data;
+      const { user, accessToken, refreshToken } = response.data;
 
       // Save tokens
       sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
 
       if (refreshToken) {
-        sessionStorage.setItem(
-          REFRESH_TOKEN_KEY,
-          refreshToken
-        );
+        sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
       } else {
         sessionStorage.removeItem(REFRESH_TOKEN_KEY);
       }
 
       // Save user
-      sessionStorage.setItem(
-        USER_KEY,
-        JSON.stringify(user)
-      );
+      sessionStorage.setItem(USER_KEY, JSON.stringify(user));
 
       set({
         user,
@@ -68,9 +54,7 @@ const useAuthStore = create((set) => ({
         user,
       };
     } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        "Login failed";
+      const message = error.response?.data?.message || "Login failed";
 
       set({
         loading: false,
@@ -87,22 +71,17 @@ const useAuthStore = create((set) => ({
   // =========================
   refreshAccessToken: async () => {
     try {
-      const refreshToken =
-        sessionStorage.getItem(REFRESH_TOKEN_KEY);
+      const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY);
 
       if (!refreshToken) {
         throw new Error("Refresh token not found");
       }
 
-      const response =
-        await refreshTokenApi(refreshToken);
+      const response = await refreshTokenApi(refreshToken);
 
       const { accessToken } = response.data;
 
-      sessionStorage.setItem(
-        ACCESS_TOKEN_KEY,
-        accessToken
-      );
+      sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
 
       set({
         accessToken,
@@ -131,8 +110,7 @@ const useAuthStore = create((set) => ({
   // =========================
   logout: async () => {
     try {
-      const refreshToken =
-        sessionStorage.getItem(REFRESH_TOKEN_KEY);
+      const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY);
 
       if (refreshToken) {
         await logoutApi(refreshToken);
@@ -168,15 +146,11 @@ const useAuthStore = create((set) => ({
   // SET AUTH FROM STORAGE
   // =========================
   initializeAuth: () => {
-    const accessToken =
-      sessionStorage.getItem(ACCESS_TOKEN_KEY);
+    const accessToken = sessionStorage.getItem(ACCESS_TOKEN_KEY);
 
-    const refreshToken =
-      sessionStorage.getItem(REFRESH_TOKEN_KEY);
+    const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY);
 
-    const user =
-      JSON.parse(sessionStorage.getItem(USER_KEY)) ||
-      null;
+    const user = JSON.parse(sessionStorage.getItem(USER_KEY)) || null;
 
     set({
       user,

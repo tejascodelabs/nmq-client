@@ -8,7 +8,7 @@ export const getMenusApi = async (shopId) => {
   });
 
   const payload = getPayload(response);
-  return Array.isArray(payload) ? payload : payload?.menus ?? [];
+  return Array.isArray(payload) ? payload : (payload?.menus ?? []);
 };
 
 export const createMenuApi = async (data) => {

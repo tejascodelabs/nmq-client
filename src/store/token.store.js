@@ -1,4 +1,3 @@
-
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -31,6 +30,6 @@ export const useTokenStore = create(
     {
       name: "current-token-storage",
       storage: createJSONStorage(() => localStorage),
-    }
-  )
+    },
+  ),
 );

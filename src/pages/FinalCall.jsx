@@ -1,339 +1,246 @@
-import { useState, useEffect, useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Ticket,
-  Users,
   Bell,
   TimerReset,
   CheckCircle2,
   AlertTriangle,
-  AlertTriangleIcon
-} from 'lucide-react'
-import backgroundImage from '../assets/background.png'
-import AdvertisementCarousel from '../components/AdvertisementCarousel'
-import api from '../api/axios'
-import { socket } from '../utils/socket'
+  AlertTriangleIcon,
+} from "lucide-react";
+import backgroundImage from "../assets/background.png";
+import AdvertisementCarousel from "../components/AdvertisementCarousel";
+import api from "../api/axios";
+import { socket } from "../utils/socket";
 
-const FINAL_CALL_DURATION = 60
- // 2 Minutes timer
+const FINAL_CALL_DURATION = 60;
 
 export default function FinalCall() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { token: routeToken, tokenId, mobile } = location.state || {}
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { token: routeToken, tokenId, mobile } = location.state || {};
 
-  const [pageReady, setPageReady] = useState(false)
-  const [liveToken, setLiveToken] = useState(routeToken || null)
+  const [pageReady, setPageReady] = useState(false);
+  const [liveToken, setLiveToken] = useState(routeToken || null);
   const [seconds, setSeconds] = useState(FINAL_CALL_DURATION);
-  const [loading, setLoading] = useState(false)
-  const [hasConfirmed, setHasConfirmed] = useState(liveToken?.status === 'imhere')
-  const [error, setError] = useState('')
-  const [timerExpired, setTimerExpired] = useState(false)
-  const [showNotArrivedModal, setShowNotArrivedModal] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [hasConfirmed, setHasConfirmed] = useState(
+    liveToken?.status === "imhere",
+  );
+  const [error, setError] = useState("");
+  const [timerExpired, setTimerExpired] = useState(false);
+  const [showNotArrivedModal, setShowNotArrivedModal] = useState(false);
 
+  const bellRef = useRef(null);
+  const bellIntervalRef = useRef(null);
 
-  const bellRef = useRef(null)
-  const bellIntervalRef = useRef(null)
-
-  const activeTokenId = liveToken?.id || tokenId
+  const activeTokenId = liveToken?.id || tokenId;
 
   useEffect(() => {
     if (!liveToken && !tokenId) {
-      navigate('/', { replace: true })
+      navigate("/", { replace: true });
     }
-  }, [liveToken, tokenId, navigate])
+  }, [liveToken, tokenId, navigate]);
 
   useEffect(() => {
     const t = setTimeout(() => {
-      setPageReady(true)
-    }, 80)
-    return () => clearTimeout(t)
-  }, [])
+      setPageReady(true);
+    }, 80);
+    return () => clearTimeout(t);
+  }, []);
 
   const shopId =
     liveToken?.shopId ??
     liveToken?.shop_id ??
     location.state?.shop?.shopId ??
-    location.state?.shop?.id
+    location.state?.shop?.id;
 
   const stopBell = () => {
     if (bellIntervalRef.current) {
-      clearInterval(bellIntervalRef.current)
-      bellIntervalRef.current = null
+      clearInterval(bellIntervalRef.current);
+      bellIntervalRef.current = null;
     }
     if (bellRef.current) {
-      bellRef.current.pause()
-      bellRef.current.currentTime = 0
-    }
-  }
-
-  useEffect(() => {
-    if (!activeTokenId) return
-
-    const joinShop = () => {
-      if (shopId != null) socket.emit('join-shop', { shopId: Number(shopId) })
-    }
-
-    const getToken = (eventData) => {
-      const payload = eventData?.data ?? eventData
-      return payload?.token ?? payload
-    }
-
-    const matchesActiveToken = (token) => {
-      const id = token?.id ?? token?._id ?? token?.tokenId ?? token?.token_id
-      return id != null && String(id) === String(activeTokenId)
-    }
-
-    const handleImHere = (eventData) => {
-      const updatedToken = getToken(eventData)
-      if (!matchesActiveToken(updatedToken)) return
-      setLiveToken(updatedToken)
-      setHasConfirmed(true)
-      stopBell()
-    }
-
-    const handleArrivalUpdated = (eventData) => {
-      const updatedToken = getToken(eventData)
-      if (!matchesActiveToken(updatedToken)) return
-
-      setLiveToken(updatedToken)
-      stopBell()
-
-      if (updatedToken.status === 'arrived') {
-        navigate('/arrived', {
-          replace: true,
-          state: { token: updatedToken },
-        })
-      } else if (updatedToken.status === 'not_arrived') {
-        setShowNotArrivedModal(true)
-      }
-    }
-
-    const handleCancelled = (eventData) => {
-      const updatedToken = getToken(eventData)
-      if (!matchesActiveToken(updatedToken)) return
-      stopBell()
-      setShowNotArrivedModal(true)
-    }
-
-    socket.on('connect', joinShop)
-    socket.on('token_im_here', handleImHere)
-    socket.on('token_arrival_updated', handleArrivalUpdated)
-    socket.on('token_cancelled', handleCancelled)
-
-    if (socket.connected) joinShop()
-
-    return () => {
-      socket.off('connect', joinShop)
-      socket.off('token_im_here', handleImHere)
-      socket.off('token_arrival_updated', handleArrivalUpdated)
-      socket.off('token_cancelled', handleCancelled)
-    }
-  }, [activeTokenId, shopId, navigate])
-
-  // Ring only while the customer has not confirmed and the call is still active.
-  useEffect(() => {
-    if (hasConfirmed || showNotArrivedModal) {
-      stopBell()
-      return
-    }
-
-    bellRef.current = new Audio('/call-bell.mp3')
-
-    const playBell = () => {
-      navigator.vibrate?.([500, 300, 500, 300, 500])
-      bellRef.current.currentTime = 0
-      bellRef.current.play().catch(() => { })
-    }
-
-    playBell()
-    bellIntervalRef.current = setInterval(playBell, 5000)
-
-    return () => {
-      stopBell()
-    }
-  }, [hasConfirmed, showNotArrivedModal])
-
-  // Countdown Timer Logic (2 Minutes)
-  // useEffect(() => {
-  //   if (timerExpired || hasConfirmed) return
-
-  //   const countdown = setInterval(() => {
-  //     setSeconds((prev) => {
-  //       if (prev <= 1) {
-  //         clearInterval(countdown)
-  //         stopBell()
-  //         setTimerExpired(true)
-  //         // Do not mark the customer absent automatically. Staff will decide after 2 minutes.
-  //         return 0
-  //       }
-  //       return prev - 1
-  //     })
-  //   }, 1000)
-
-  //   return () => clearInterval(countdown)
-  // }, [timerExpired, hasConfirmed])
-
-
-  // Countdown Timer Logic - based on backend calledAt timestamp
-  // useEffect(() => {
-  //   if (hasConfirmed) return;
-
-  //   const calledAt = liveToken?.calledAt;
-
-  //   if (!calledAt) {
-  //     console.error("Backend calledAt timestamp missing");
-  //     return;
-  //   }
-
-  //   const startTime = new Date(calledAt).getTime();
-
-  //   if (!Number.isFinite(startTime)) {
-  //     console.error("Invalid calledAt timestamp:", calledAt);
-  //     return;
-  //   }
-
-  //   const updateTimer = () => {
-  //     const elapsedSeconds = Math.floor(
-  //       (Date.now() - startTime) / 1000
-  //     );
-
-  //     console.log(Date.now());
-  //     console.log(new Date().toISOString()); // UTC
-  //     console.log(new Date().toString());    // Local IST
-
-  //     const remaining = Math.max(
-  //       0,
-  //       FINAL_CALL_DURATION - elapsedSeconds
-  //     );
-
-  //     console.log("Backend:", new Date(calledAt).getTime());
-  //     console.log("Browser:", Date.now());
-
-  //     console.log(
-  //       "Difference:",
-  //       (Date.now() - new Date(calledAt).getTime()) / 1000
-  //     );;
-
-  //     setSeconds(remaining);
-
-  //     if (remaining <= 0) {
-  //       setTimerExpired(true);
-  //       stopBell();
-  //     }
-  //   };
-
-  //   // Calculate immediately when the page opens or reloads
-  //   updateTimer();
-
-  //   const interval = setInterval(updateTimer, 1000);
-
-  //   return () => clearInterval(interval);
-  // }, [liveToken?.calledAt, liveToken?.called_at, hasConfirmed]);
-
-  // Countdown Timer - 2 Minutes (IST Adjustment)
-useEffect(() => {
-  if (hasConfirmed) return;
-
-  const calledAt = liveToken?.calledAt;
-
-  if (!calledAt) {
-    console.error("Backend calledAt timestamp missing");
-    return;
-  }
-
-  // Backend IST to UTC timestamp adjustment
-  const IST_OFFSET = 5.5 * 60 * 60 * 1000;
-
-  const startTime =
-    new Date(calledAt).getTime() - IST_OFFSET;
-
-  if (!Number.isFinite(startTime)) {
-    console.error("Invalid calledAt:", calledAt);
-    return;
-  }
-
-  const updateTimer = () => {
-    const elapsedSeconds = Math.floor(
-      (Date.now() - startTime) / 1000
-    );
-
-    const remaining = Math.max(
-      0,
-      FINAL_CALL_DURATION - elapsedSeconds
-    );
-
-    setSeconds(remaining);
-
-    if (remaining <= 0) {
-      setTimerExpired(true);
-      stopBell();
+      bellRef.current.pause();
+      bellRef.current.currentTime = 0;
     }
   };
 
-  updateTimer();
+  useEffect(() => {
+    if (!activeTokenId) return;
 
-  const interval = setInterval(updateTimer, 1000);
+    const joinShop = () => {
+      if (shopId != null) socket.emit("join-shop", { shopId: Number(shopId) });
+    };
 
-  return () => clearInterval(interval);
+    const getToken = (eventData) => {
+      const payload = eventData?.data ?? eventData;
+      return payload?.token ?? payload;
+    };
 
-}, [liveToken?.calledAt, hasConfirmed]);
+    const matchesActiveToken = (token) => {
+      const id = token?.id ?? token?._id ?? token?.tokenId ?? token?.token_id;
+      return id != null && String(id) === String(activeTokenId);
+    };
 
+    const handleImHere = (eventData) => {
+      const updatedToken = getToken(eventData);
+      if (!matchesActiveToken(updatedToken)) return;
+      setLiveToken(updatedToken);
+      setHasConfirmed(true);
+      stopBell();
+    };
+
+    const handleArrivalUpdated = (eventData) => {
+      const updatedToken = getToken(eventData);
+      if (!matchesActiveToken(updatedToken)) return;
+
+      setLiveToken(updatedToken);
+      stopBell();
+
+      if (updatedToken.status === "arrived") {
+        navigate("/arrived", {
+          replace: true,
+          state: { token: updatedToken },
+        });
+      } else if (updatedToken.status === "not_arrived") {
+        setShowNotArrivedModal(true);
+      }
+    };
+
+    const handleCancelled = (eventData) => {
+      const updatedToken = getToken(eventData);
+      if (!matchesActiveToken(updatedToken)) return;
+      stopBell();
+      setShowNotArrivedModal(true);
+    };
+
+    socket.on("connect", joinShop);
+    socket.on("token_im_here", handleImHere);
+    socket.on("token_arrival_updated", handleArrivalUpdated);
+    socket.on("token_cancelled", handleCancelled);
+
+    if (socket.connected) joinShop();
+
+    return () => {
+      socket.off("connect", joinShop);
+      socket.off("token_im_here", handleImHere);
+      socket.off("token_arrival_updated", handleArrivalUpdated);
+      socket.off("token_cancelled", handleCancelled);
+    };
+  }, [activeTokenId, shopId, navigate]);
+
+  useEffect(() => {
+    if (hasConfirmed || showNotArrivedModal) {
+      stopBell();
+      return;
+    }
+
+    bellRef.current = new Audio("/call-bell.mp3");
+
+    const playBell = () => {
+      navigator.vibrate?.([500, 300, 500, 300, 500]);
+      bellRef.current.currentTime = 0;
+      bellRef.current.play().catch(() => {});
+    };
+
+    playBell();
+    bellIntervalRef.current = setInterval(playBell, 5000);
+
+    return () => {
+      stopBell();
+    };
+  }, [hasConfirmed, showNotArrivedModal]);
+
+  useEffect(() => {
+    if (hasConfirmed) return;
+
+    const calledAt = liveToken?.calledAt;
+
+    if (!calledAt) {
+      console.error("Backend calledAt timestamp missing");
+      return;
+    }
+
+    // Backend IST to UTC timestamp adjustment
+    const IST_OFFSET = 5.5 * 60 * 60 * 1000;
+
+    const startTime = new Date(calledAt).getTime() - IST_OFFSET;
+
+    if (!Number.isFinite(startTime)) {
+      console.error("Invalid calledAt:", calledAt);
+      return;
+    }
+
+    const updateTimer = () => {
+      const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+
+      const remaining = Math.max(0, FINAL_CALL_DURATION - elapsedSeconds);
+
+      setSeconds(remaining);
+
+      if (remaining <= 0) {
+        setTimerExpired(true);
+        stopBell();
+      }
+    };
+
+    updateTimer();
+
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+  }, [liveToken?.calledAt, hasConfirmed]);
 
   const handleImHere = async () => {
-    if (loading) return
+    if (loading) return;
 
     try {
-      setLoading(true)
+      setLoading(true);
 
       if (!activeTokenId) {
-        setError('Token ID not found.')
-        return
+        setError("Token ID not found.");
+        return;
       }
 
-      const response = await api.patch(
-        `/tokens/${activeTokenId}/im-here`,
-        {
-          mobile: liveToken?.mobile || mobile,
-        }
-      )
+      const response = await api.patch(`/tokens/${activeTokenId}/im-here`, {
+        mobile: liveToken?.mobile || mobile,
+      });
 
-      const result = response.data
+      const result = response.data;
       if (result?.success === false) {
-        throw new Error(result.message || 'Could not confirm your arrival.')
+        throw new Error(result.message || "Could not confirm your arrival.");
       }
 
-      const updatedToken = result?.token || result?.data?.token || result?.data || liveToken
+      const updatedToken =
+        result?.token || result?.data?.token || result?.data || liveToken;
 
-      stopBell()
-      // navigate('/arrived', {
-      //   replace: true,
-      //   state: { token: updatedToken },
-      // })
+      stopBell();
     } catch (error) {
-      console.error("I'm Here failed:", error)
+      console.error("I'm Here failed:", error);
       setError(
         error.response?.data?.message ||
-        error.message ||
-        "Could not confirm your arrival."
-      )
+          error.message ||
+          "Could not confirm your arrival.",
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  if (!liveToken && !tokenId) return null
+  if (!liveToken && !tokenId) return null;
 
-  const tokenNum = liveToken?.tokenNo || '00'
-  const qType = liveToken?.queueType || 'A'
+  const tokenNum = liveToken?.tokenNo || "00";
+  const qType = liveToken?.queueType || "A";
 
   return (
     <div
-      className={`min-h-screen w-full bg-[#F8F4EA] bg-top bg-repeat-y flex justify-center p-3 sm:p-5 md:p-8 transition-all duration-450 ease-out ${pageReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
-        }`}
+      className={`min-h-screen w-full bg-[#F8F4EA] bg-top bg-repeat-y flex justify-center p-3 sm:p-5 md:p-8 transition-all duration-450 ease-out ${
+        pageReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+      }`}
       style={{
         backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: '100% auto'
+        backgroundSize: "100% auto",
       }}
     >
       <style>{`
@@ -355,7 +262,6 @@ useEffect(() => {
 
       {/* CONTAINER */}
       <div className="w-full max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-4xl min-h-[calc(100vh-40px)] flex flex-col gap-3.5 sm:gap-5 md:gap-6 relative">
-
         {/* NOT ARRIVED MODAL */}
         {showNotArrivedModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
@@ -367,10 +273,11 @@ useEffect(() => {
                 Marked as Not Arrived
               </h3>
               <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-                Your final call timer has expired or you were marked absent. Please contact the front desk or rejoin the queue.
+                Your final call timer has expired or you were marked absent.
+                Please contact the front desk or rejoin the queue.
               </p>
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate("/")}
                 className="w-full h-12 bg-amber-800 text-white font-bold rounded-xl hover:bg-amber-900 transition-colors shadow-md"
               >
                 Back to Shops
@@ -427,10 +334,11 @@ useEffect(() => {
 
           <div className="text-center">
             <div
-              className={`text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-none ${seconds <= 15 ? 'fc-timer-low text-red-600' : 'text-emerald-600'
-                }`}
+              className={`text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-none ${
+                seconds <= 15 ? "fc-timer-low text-red-600" : "text-emerald-600"
+              }`}
             >
-              {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}
+              {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}
             </div>
 
             <div className="text-xs sm:text-sm text-[#8A7F71] font-medium mt-1">
@@ -451,10 +359,11 @@ useEffect(() => {
             type="button"
             onClick={handleImHere}
             disabled={loading || hasConfirmed || timerExpired}
-            className={`w-full h-14 sm:h-16 mt-6 rounded-2xl text-white font-bold text-base sm:text-lg flex items-center justify-center gap-2.5 shadow-lg transition-all ${loading || hasConfirmed || timerExpired
-              ? 'bg-gray-400 cursor-not-allowed opacity-70'
-              : 'bg-gradient-to-r from-emerald-600 to-emerald-500 cursor-pointer active:scale-[0.98]'
-              }`}
+            className={`w-full h-14 sm:h-16 mt-6 rounded-2xl text-white font-bold text-base sm:text-lg flex items-center justify-center gap-2.5 shadow-lg transition-all ${
+              loading || hasConfirmed || timerExpired
+                ? "bg-gray-400 cursor-not-allowed opacity-70"
+                : "bg-gradient-to-r from-emerald-600 to-emerald-500 cursor-pointer active:scale-[0.98]"
+            }`}
           >
             {loading ? (
               <>
@@ -480,7 +389,10 @@ useEffect(() => {
           </button>
 
           {error && (
-            <p role="alert" className="mt-3 text-center text-sm font-medium text-red-700">
+            <p
+              role="alert"
+              className="mt-3 text-center text-sm font-medium text-red-700"
+            >
               {error}
             </p>
           )}
@@ -488,12 +400,9 @@ useEffect(() => {
 
         {/* ADVERTISEMENT */}
         <div className="mt-1">
-          <AdvertisementCarousel
-            placement="final_call"
-          />
+          <AdvertisementCarousel placement="final_call" />
         </div>
-
       </div>
     </div>
-  )
+  );
 }

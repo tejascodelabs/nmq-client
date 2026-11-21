@@ -1,94 +1,94 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Html5Qrcode } from 'html5-qrcode'
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Html5Qrcode } from "html5-qrcode";
 import {
   ArrowLeft,
   Camera,
   Lightbulb,
   CheckCircle2,
-  AlertCircle
-} from 'lucide-react'
+  AlertCircle,
+} from "lucide-react";
 
 // Original asset imports preserved
-import backgroundImage from '../assets/background.png'
-import misalBanner from '../assets/misal-shop-banner.png'
+import backgroundImage from "../assets/background.png";
+import misalBanner from "../assets/misal-shop-banner.png";
 
 export default function ScanQRCode() {
-  const navigate = useNavigate()
-  const scannerRef = useRef(null)
+  const navigate = useNavigate();
+  const scannerRef = useRef(null);
 
-  const [error, setError] = useState('')
-  const [scanning, setScanning] = useState(true)
+  const [error, setError] = useState("");
+  const [scanning, setScanning] = useState(true);
 
   useEffect(() => {
-    const scanner = new Html5Qrcode('qr-reader')
-    scannerRef.current = scanner
+    const scanner = new Html5Qrcode("qr-reader");
+    scannerRef.current = scanner;
 
     scanner.start(
-      { facingMode: 'environment' },
+      { facingMode: "environment" },
       {
         fps: 10,
         qrbox: (viewfinderWidth, viewfinderHeight) => {
-          const size = Math.min(viewfinderWidth, viewfinderHeight) * 0.85
-          return { width: size, height: size }
-        }
+          const size = Math.min(viewfinderWidth, viewfinderHeight) * 0.85;
+          return { width: size, height: size };
+        },
       },
       async (decodedText) => {
-        if (!scanning) return
-        setScanning(false)
+        if (!scanning) return;
+        setScanning(false);
 
         try {
           if (scannerRef.current?.isScanning) {
-            await scannerRef.current.stop()
+            await scannerRef.current.stop();
           }
         } catch (e) {
           // Scanner stop error suppression
         }
 
-        scannerRef.current = null
+        scannerRef.current = null;
 
         if (!decodedText) {
-          setError('Invalid QR code scanned')
-          setScanning(true)
-          return
+          setError("Invalid QR code scanned");
+          setScanning(true);
+          return;
         }
 
         // QR URL ya text se ID extract karna
-        let id = decodedText.trim()
+        let id = decodedText.trim();
         try {
-          const url = new URL(decodedText)
-          const segments = url.pathname.split('/').filter(Boolean)
-          id = segments[segments.length - 1] || decodedText
+          const url = new URL(decodedText);
+          const segments = url.pathname.split("/").filter(Boolean);
+          id = segments[segments.length - 1] || decodedText;
         } catch (e) {
-          const parts = decodedText.split('/')
-          id = parts[parts.length - 1] || decodedText
+          const parts = decodedText.split("/");
+          id = parts[parts.length - 1] || decodedText;
         }
 
         // Direct /details/:id par navigate karna
         navigate(`/details/${id}`, {
-          replace: true
-        })
+          replace: true,
+        });
       },
-      () => { }
-    )
+      () => {},
+    );
 
     return () => {
       try {
         if (scannerRef.current?.isScanning) {
-          scannerRef.current.stop().catch(() => { })
+          scannerRef.current.stop().catch(() => {});
         }
       } catch (e) {
         // Cleanup error suppression
       }
-    }
-  }, [navigate, scanning])
+    };
+  }, [navigate, scanning]);
 
   return (
     <div
       className="min-h-screen w-full bg-[#f8f4ea] bg-top bg-repeat-y font-sans pb-8 antialiased"
       style={{
         backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: '100% auto'
+        backgroundSize: "100% auto",
       }}
     >
       <style>
@@ -112,11 +112,10 @@ export default function ScanQRCode() {
 
       {/* Main Responsive Wrapper */}
       <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto overflow-hidden relative px-4 sm:px-6">
-
         {/* Top Header Controls */}
         <div className="relative pt-4 sm:pt-6 z-10 flex items-center justify-between">
           <button
-            onClick={() => navigate('/shops')}
+            onClick={() => navigate("/shops")}
             className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white text-orange-600 shadow-md flex items-center justify-center hover:bg-orange-50 active:scale-95 transition-all"
             aria-label="Go Back"
           >
@@ -137,7 +136,8 @@ export default function ScanQRCode() {
             Scan QR
           </h1>
           <p className="mt-2 text-gray-600 text-sm sm:text-base md:text-lg max-w-xs sm:max-w-sm md:max-w-md mx-auto leading-relaxed">
-            Point your camera at the shop QR code to instantly receive your queue token.
+            Point your camera at the shop QR code to instantly receive your
+            queue token.
           </p>
         </div>
 
@@ -198,8 +198,7 @@ export default function ScanQRCode() {
             </div>
           </div>
         </div>
-
       </div>
     </div>
-  )
+  );
 }

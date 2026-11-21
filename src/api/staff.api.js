@@ -14,7 +14,6 @@ export const getStaffByShopIdApi = async (shopId) => {
   return response.data;
 };
 
-
 export const createStaffApi = async (data) => {
   const response = await api.post("/staff", data);
   return response.data;

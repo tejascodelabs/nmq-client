@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { socket } from "../utils/socket";
@@ -8,17 +7,11 @@ export default function TokenCallListener() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const currentTokenId = useTokenStore(
-    (state) => state.currentTokenId
-  );
+  const currentTokenId = useTokenStore((state) => state.currentTokenId);
 
-  const currentMobile = useTokenStore(
-    (state) => state.currentMobile
-  );
+  const currentMobile = useTokenStore((state) => state.currentMobile);
 
-  const currentShop = useTokenStore(
-    (state) => state.currentShop
-  );
+  const currentShop = useTokenStore((state) => state.currentShop);
 
   // Latest values listener ke andar available rahenge
   const latestRef = useRef({});
@@ -37,10 +30,7 @@ export default function TokenCallListener() {
       const token = payload?.token ?? payload;
 
       const calledTokenId =
-        token?.id ??
-        token?._id ??
-        token?.tokenId ??
-        token?.token_id;
+        token?.id ?? token?._id ?? token?.tokenId ?? token?.token_id;
 
       const savedTokenId =
         latestRef.current.currentTokenId ??

@@ -144,7 +144,7 @@ export function AdvertisementCard({
   const [error, setError] = useState(false);
   const [impressionRecorded, setImpressionRecorded] = useState(false);
 
-useEffect(() => {
+  useEffect(() => {
     setLoaded(false);
     setError(false);
     setImpressionRecorded(false);
@@ -152,22 +152,16 @@ useEffect(() => {
 
   if (!advertisement) return null;
 
-  const advertisementId =
-    advertisement._id ?? advertisement.id;
+  const advertisementId = advertisement._id ?? advertisement.id;
 
-  const imageUrl =
-    advertisement.image_url ?? advertisement.imageUrl;
+  const imageUrl = advertisement.image_url ?? advertisement.imageUrl;
 
-  const redirectUrl =
-    advertisement.redirect_url ?? advertisement.redirectUrl;
+  const redirectUrl = advertisement.redirect_url ?? advertisement.redirectUrl;
 
   const eventTitle =
-    advertisement.event_title ??
-    advertisement.eventTitle ??
-    "Advertisement";
+    advertisement.event_title ?? advertisement.eventTitle ?? "Advertisement";
 
-  const ctaText =
-    advertisement.cta_text ?? advertisement.ctaText;
+  const ctaText = advertisement.cta_text ?? advertisement.ctaText;
 
   const recordImpression = async () => {
     if (!advertisementId || impressionRecorded) return;
