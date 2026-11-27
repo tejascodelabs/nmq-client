@@ -515,6 +515,7 @@ import { getShopByIdApi } from "../api/shop.api";
 import SimpleLoader from "../components/SimpleLoader";
 import { useTokenStore } from "../store/token.store";
 import MisalLoader from "../components/MisalLoader";
+import SEO from "../components/SEO";
 
 export default function ConfirmDetails() {
   const navigate = useNavigate();
@@ -574,8 +575,8 @@ export default function ConfirmDetails() {
         if (!isSilent) {
           setError(
             err?.response?.data?.message ||
-              err?.message ||
-              "Unable to fetch shop details.",
+            err?.message ||
+            "Unable to fetch shop details.",
           );
         }
         setShop(null);
@@ -737,225 +738,232 @@ export default function ConfirmDetails() {
   }
 
   return (
-    <div
-      className="min-h-screen w-full bg-[#f8f4ea] bg-top bg-repeat-y font-sans pb-10 antialiased"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: "100% auto",
-      }}
-    >
-      <div className="max-w-4xl mx-auto flex items-center justify-between p-4 sm:p-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-transparent border-none text-[#6b4f26] text-sm sm:text-base font-bold cursor-pointer flex items-center gap-1.5 hover:text-orange-600 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back</span>
-        </button>
-      </div>
-
-      <div className="max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-6">
-          <h1 className="m-0 text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#3b1d00] leading-tight">
-            Confirm Details
-          </h1>
-          <p className="mt-1.5 text-[#6b4f26] text-xs sm:text-sm md:text-base leading-snug">
-            Verify your details to instantly reserve your table track
-          </p>
+    <>
+      <SEO
+        title={`${shop.shopName} - Live Misal Queue, Menu & Wait Time`}
+        description={`Check live queue status, current waiting time, and get your digital token for ${shop.shopName}${shop.area ? ` in ${shop.area}, Nashik` : ' in Nashik'}.`}
+        keywords={`${shop.shopName}, ${shop.shopName} nashik, ${shop.shopName} misal queue, best misal in nashik, live misal token`}
+        canonicalUrl={`https://nashikmisalqueue.com/details/${shop.id}`}
+      />
+      <div
+        className="min-h-screen w-full bg-[#f8f4ea] bg-top bg-repeat-y font-sans pb-10 antialiased"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: "100% auto",
+        }}
+      >
+        <div className="max-w-4xl mx-auto flex items-center justify-between p-4 sm:p-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-transparent border-none text-[#6b4f26] text-sm sm:text-base font-bold cursor-pointer flex items-center gap-1.5 hover:text-orange-600 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back</span>
+          </button>
         </div>
 
-        <div className="bg-white/60 backdrop-blur-md rounded-3xl p-4 sm:p-6 shadow-xl border border-white/70">
-          {/* Shop Highlight Card */}
-          <div className="bg-white rounded-2xl p-3.5 mb-5 flex items-center shadow-sm border border-orange-100/50">
-            <div className="flex items-center gap-3.5 flex-1 min-w-0">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-[#fcf7ec] bg-white shrink-0">
-                <img
-                  src={shop?.profileImage}
-                  alt={shop?.shopName || shop?.name || "Shop"}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="min-w-0">
-                <div className="text-base sm:text-lg md:text-xl font-extrabold text-[#2c1000] truncate leading-tight">
-                  {shop?.shopName}
-                </div>
-              </div>
-            </div>
+        <div className="max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-6">
+            <h1 className="m-0 text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#3b1d00] leading-tight">
+              Confirm Details
+            </h1>
+            <p className="mt-1.5 text-[#6b4f26] text-xs sm:text-sm md:text-base leading-snug">
+              Verify your details to instantly reserve your table track
+            </p>
           </div>
 
-          {/* Conditional Rendering: Shop Closed / Queue Paused */}
-          {isshopStatus ? (
-            <div className="py-10 px-5 text-center bg-red-50 border border-red-200 rounded-2xl">
-              <div className="flex justify-center mb-3">
-                <AlertTriangle className="w-12 h-12 text-red-500" />
+          <div className="bg-white/60 backdrop-blur-md rounded-3xl p-4 sm:p-6 shadow-xl border border-white/70">
+            {/* Shop Highlight Card */}
+            <div className="bg-white rounded-2xl p-3.5 mb-5 flex items-center shadow-sm border border-orange-100/50">
+              <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-[#fcf7ec] bg-white shrink-0">
+                  <img
+                    src={shop?.profileImage}
+                    alt={shop?.shopName || shop?.name || "Shop"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="min-w-0">
+                  <div className="text-base sm:text-lg md:text-xl font-extrabold text-[#2c1000] truncate leading-tight">
+                    {shop?.shopName}
+                  </div>
+                </div>
               </div>
-
-              <h3 className="text-xl font-extrabold text-red-700">
-                Temp Shop is Close
-              </h3>
-
-              <p className="mt-2 text-sm text-red-600">
-                This shop is temporarily closed. Please try again later.
-              </p>
             </div>
-          ) : (
-            <>
-              {/* Form Inputs */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block mb-2 font-bold text-[#4a2500] text-xs sm:text-sm">
-                    Mobile Number
-                  </label>
-                  <div className="flex items-center bg-white rounded-2xl px-4 h-12 border border-[#e1d5c1] focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
-                    <Phone className="w-5 h-5 text-gray-400 mr-2.5 shrink-0" />
-                    <input
-                      type="tel"
-                      value={mobile}
-                      placeholder="Enter 10 digit number"
-                      onChange={(e) =>
-                        setMobile(
-                          e.target.value.replace(/\D/g, "").slice(0, 10),
-                        )
-                      }
-                      className="w-full border-none outline-none text-sm sm:text-base font-semibold text-[#2c1000] bg-transparent placeholder-gray-400"
-                    />
-                  </div>
+
+            {/* Conditional Rendering: Shop Closed / Queue Paused */}
+            {isshopStatus ? (
+              <div className="py-10 px-5 text-center bg-red-50 border border-red-200 rounded-2xl">
+                <div className="flex justify-center mb-3">
+                  <AlertTriangle className="w-12 h-12 text-red-500" />
                 </div>
 
-                <div>
-                  <label className="block mb-2 font-bold text-[#4a2500] text-xs sm:text-sm">
-                    Your Name
-                  </label>
-                  <div className="flex items-center bg-white rounded-2xl px-4 h-12 border border-[#e1d5c1] focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
-                    <User className="w-5 h-5 text-gray-400 mr-2.5 shrink-0" />
-                    <input
-                      type="text"
-                      value={name}
-                      placeholder="Enter your name"
-                      onChange={(e) => {
-                        const cleaned = e.target.value.replace(
-                          /[^a-zA-Z\s]/g,
-                          "",
-                        );
-                        const capitalized = cleaned.replace(/\b\w/g, (l) =>
-                          l.toUpperCase(),
-                        );
-                        setName(capitalized);
-                      }}
-                      className="w-full border-none outline-none text-sm sm:text-base font-semibold text-[#2c1000] bg-transparent placeholder-gray-400"
-                    />
-                  </div>
-                </div>
+                <h3 className="text-xl font-extrabold text-red-700">
+                  Temp Shop is Close
+                </h3>
+
+                <p className="mt-2 text-sm text-red-600">
+                  This shop is temporarily closed. Please try again later.
+                </p>
               </div>
+            ) : (
+              <>
+                {/* Form Inputs */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block mb-2 font-bold text-[#4a2500] text-xs sm:text-sm">
+                      Mobile Number
+                    </label>
+                    <div className="flex items-center bg-white rounded-2xl px-4 h-12 border border-[#e1d5c1] focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+                      <Phone className="w-5 h-5 text-gray-400 mr-2.5 shrink-0" />
+                      <input
+                        type="tel"
+                        value={mobile}
+                        placeholder="Enter 10 digit number"
+                        onChange={(e) =>
+                          setMobile(
+                            e.target.value.replace(/\D/g, "").slice(0, 10),
+                          )
+                        }
+                        className="w-full border-none outline-none text-sm sm:text-base font-semibold text-[#2c1000] bg-transparent placeholder-gray-400"
+                      />
+                    </div>
+                  </div>
 
-              {/* Guest Selector Counter */}
-              <div className="mt-6 text-center">
-                <label className="block font-extrabold text-[#3b1d00] mb-3 text-sm sm:text-base">
-                  Number of Guests
-                </label>
-
-                <div className="inline-block w-full max-w-xs">
-                  <div className="flex items-center justify-between bg-white px-2 py-1.5 rounded-2xl border border-[#e1d5c1] shadow-xs">
-                    <button
-                      type="button"
-                      onClick={() => setPeople((p) => Math.max(1, p - 1))}
-                      className="w-10 h-10 rounded-xl bg-[#fcf7ec] text-orange-500 flex items-center justify-center font-bold cursor-pointer active:scale-90 transition-transform"
-                      aria-label="Decrease guest count"
-                    >
-                      <Minus className="w-5 h-5" />
-                    </button>
-                    <span className="text-xl font-extrabold text-[#2c1000] min-w-10 text-center">
-                      {people}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setPeople((p) => Math.min(20, p + 1))}
-                      className="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold cursor-pointer active:scale-90 transition-transform"
-                      aria-label="Increase guest count"
-                    >
-                      <Plus className="w-5 h-5" />
-                    </button>
+                  <div>
+                    <label className="block mb-2 font-bold text-[#4a2500] text-xs sm:text-sm">
+                      Your Name
+                    </label>
+                    <div className="flex items-center bg-white rounded-2xl px-4 h-12 border border-[#e1d5c1] focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+                      <User className="w-5 h-5 text-gray-400 mr-2.5 shrink-0" />
+                      <input
+                        type="text"
+                        value={name}
+                        placeholder="Enter your name"
+                        onChange={(e) => {
+                          const cleaned = e.target.value.replace(
+                            /[^a-zA-Z\s]/g,
+                            "",
+                          );
+                          const capitalized = cleaned.replace(/\b\w/g, (l) =>
+                            l.toUpperCase(),
+                          );
+                          setName(capitalized);
+                        }}
+                        className="w-full border-none outline-none text-sm sm:text-base font-semibold text-[#2c1000] bg-transparent placeholder-gray-400"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-2.5 text-[#7c5c2e] text-xs sm:text-sm font-medium">
-                  You can add up to 20 people max
+                {/* Guest Selector Counter */}
+                <div className="mt-6 text-center">
+                  <label className="block font-extrabold text-[#3b1d00] mb-3 text-sm sm:text-base">
+                    Number of Guests
+                  </label>
+
+                  <div className="inline-block w-full max-w-xs">
+                    <div className="flex items-center justify-between bg-white px-2 py-1.5 rounded-2xl border border-[#e1d5c1] shadow-xs">
+                      <button
+                        type="button"
+                        onClick={() => setPeople((p) => Math.max(1, p - 1))}
+                        className="w-10 h-10 rounded-xl bg-[#fcf7ec] text-orange-500 flex items-center justify-center font-bold cursor-pointer active:scale-90 transition-transform"
+                        aria-label="Decrease guest count"
+                      >
+                        <Minus className="w-5 h-5" />
+                      </button>
+                      <span className="text-xl font-extrabold text-[#2c1000] min-w-10 text-center">
+                        {people}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setPeople((p) => Math.min(20, p + 1))}
+                        className="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold cursor-pointer active:scale-90 transition-transform"
+                        aria-label="Increase guest count"
+                      >
+                        <Plus className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5 text-[#7c5c2e] text-xs sm:text-sm font-medium">
+                    You can add up to 20 people max
+                  </div>
+
+                  {people >= 7 && (
+                    <div className="mt-3 text-xs text-amber-800 bg-amber-50 rounded-xl p-2.5 font-semibold border border-amber-200">
+                      Groups of 7+ join the Q8 queue together
+                    </div>
+                  )}
                 </div>
 
-                {people >= 7 && (
-                  <div className="mt-3 text-xs text-amber-800 bg-amber-50 rounded-xl p-2.5 font-semibold border border-amber-200">
-                    Groups of 7+ join the Q8 queue together
+                {/* Queue Type Info */}
+                {!error && (
+                  <div className="mt-5 bg-emerald-50 rounded-2xl p-3 flex items-center gap-2.5 border border-emerald-200">
+                    <Users className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <div className="text-xs sm:text-sm font-bold text-emerald-800">
+                      You will join the{" "}
+                      <span className="underline">{queueType}</span> group queue
+                    </div>
                   </div>
                 )}
+              </>
+            )}
+
+            {/* Error Message */}
+            {error && !isSilent && (
+              <div className="mt-4 bg-red-50 border border-red-200 rounded-2xl p-3 text-red-600 font-bold text-xs sm:text-sm flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{error}</span>
               </div>
+            )}
 
-              {/* Queue Type Info */}
-              {!error && (
-                <div className="mt-5 bg-emerald-50 rounded-2xl p-3 flex items-center gap-2.5 border border-emerald-200">
-                  <Users className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <div className="text-xs sm:text-sm font-bold text-emerald-800">
-                    You will join the{" "}
-                    <span className="underline">{queueType}</span> group queue
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Error Message */}
-          {error && !isSilent && (
-            <div className="mt-4 bg-red-50 border border-red-200 rounded-2xl p-3 text-red-600 font-bold text-xs sm:text-sm flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="mt-5">
-            <button
-              onClick={handleContinue}
-              disabled={loading}
-              className={`w-full h-13 rounded-2xl text-white font-bold text-base transition-all shadow-md flex items-center justify-center ${
-                loading
+            {/* Actions */}
+            <div className="mt-5">
+              <button
+                onClick={handleContinue}
+                disabled={loading}
+                className={`w-full h-13 rounded-2xl text-white font-bold text-base transition-all shadow-md flex items-center justify-center ${loading
                   ? "bg-gray-400 cursor-not-allowed shadow-none"
                   : "bg-gradient-to-r from-orange-500 to-orange-600 hover:opacity-95 active:scale-95"
-              }`}
-            >
-              {loading && !isSilent
-                ? "Saving Details..."
-                : isQueuePaused
-                  ? "SUBMIT DETAILS"
-                  : "JOIN THE QUEUE"}
-            </button>
+                  }`}
+              >
+                {loading && !isSilent
+                  ? "Saving Details..."
+                  : isQueuePaused
+                    ? "SUBMIT DETAILS"
+                    : "JOIN THE QUEUE"}
+              </button>
 
-            {/* Rules Block */}
-            <div className="mt-5 bg-white p-4 rounded-2xl shadow-xs border border-amber-100/60">
-              <div className="text-sm sm:text-base font-extrabold text-[#3b1d00] mb-3 flex items-center gap-1.5">
-                <Info className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
-                <span>Queue Rules & Guidelines</span>
-              </div>
+              {/* Rules Block */}
+              <div className="mt-5 bg-white p-4 rounded-2xl shadow-xs border border-amber-100/60">
+                <div className="text-sm sm:text-base font-extrabold text-[#3b1d00] mb-3 flex items-center gap-1.5">
+                  <Info className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
+                  <span>Queue Rules & Guidelines</span>
+                </div>
 
-              <div className="flex flex-col gap-2.5 text-gray-600 text-xs sm:text-sm font-medium">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>One active token per unique mobile registration.</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Please stay near premises; turn on push warnings.</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>
-                    Token automatically expires if context call is skipped.
-                  </span>
+                <div className="flex flex-col gap-2.5 text-gray-600 text-xs sm:text-sm font-medium">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>One active token per unique mobile registration.</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Please stay near premises; turn on push warnings.</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>
+                      Token automatically expires if context call is skipped.
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
